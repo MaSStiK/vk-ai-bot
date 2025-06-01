@@ -3,30 +3,29 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import os, time, json
 from datetime import datetime, timezone
-from config import base_prompt
-from openai import OpenAI
-from dotenv import load_dotenv
 
+# Загрузка кастомных файлов
+from config import base_prompt
+from utils import log_error, load_memory, save_memory
+user_histories = load_memory()
+
+from dotenv import load_dotenv
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 VK_TOKEN = os.getenv("VK_TOKEN")
 
+from openai import OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openrouter.ai/api/v1")
 
 hash_users = {}
-user_histories = {}
-
 MAX_HISTORY_LENGTH = 20  # Ограничение на количество сообщений в истории
-
-def get_time_now():
-    return str(datetime.now(timezone.utc)).split(".")[0].replace(":", ".")
 
 def main():
     session = vk_api.VkApi(token=VK_TOKEN)
     vk = session.get_api()
     longpoll = VkLongPoll(session)
-
+    user_histories = load_memory()
     print("Bot started")
 
     def vk_messages_send(peer_id, message, reply_to=None):
@@ -74,35 +73,35 @@ def main():
                     if replied_message["from_id"] == 817934388:
 
                         # Инициализируем историю пользователя, если её нет
-                        if user_id not in user_histories:
-                            user_histories[user_id] = [{"role": "user", "content": base_prompt}]
+                        if str(user_id) not in user_histories:
+                            user_histories[str(user_id)] = [{"role": "user", "content": base_prompt}]
 
                         # Добавляем новое сообщение в историю
-                        user_histories[user_id].append({"role": "user", "content": f"{user_name}: {message}"})
+                        user_histories[str(user_id)].append({"role": "user", "content": f"{user_name}: {message}"})
 
                         # Обрезаем старую историю при необходимости
-                        if len(user_histories[user_id]) > MAX_HISTORY_LENGTH:
-                            user_histories[user_id] = [user_histories[user_id][0]] + user_histories[user_id][-MAX_HISTORY_LENGTH:]
+                        if len(user_histories[str(user_id)]) > MAX_HISTORY_LENGTH:
+                            user_histories[str(user_id)] = [user_histories[str(user_id)][0]] + user_histories[str(user_id)][-MAX_HISTORY_LENGTH:]
 
                         try:
                             ai_response = client.chat.completions.create(
                                 model="deepseek/deepseek-chat-v3-0324:free",
-                                messages=user_histories[user_id]
+                                messages=user_histories[str(user_id)]
                             )
                             answer = ai_response.choices[0].message.content.strip()
 
                             # Добавляем ответ ИИ в историю
-                            user_histories[user_id].append({"role": "assistant", "content": answer})
+                            user_histories[str(user_id)].append({"role": "assistant", "content": answer})
+                            save_memory(user_histories)
 
                             print(f"Ответ нейросети: {answer}")
                             vk_messages_send(peer_id=peer_id, message=answer, reply_to=message_id)
 
                         except Exception as e:
                             print(f"Ошибка обработки сообщения: {e}")
-                        
+
                 except Exception as e:
                     print(f"Ошибка обработки reply: {e}")
-                
 
 if __name__ == "__main__":
     while True:
@@ -110,6 +109,5 @@ if __name__ == "__main__":
             main()
         except Exception as e:
             print(f"Ошибка: {e}")
-            with open("error.txt", "a") as f:
-                f.write(get_time_now() + " " + str(e) + "\n")
+            log_error(e)
         time.sleep(4)

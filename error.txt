@@ -1,1 +1,0 @@
-2025-05-31 23.22.50 '<' not supported between instances of 'NoneType' and 'int'
