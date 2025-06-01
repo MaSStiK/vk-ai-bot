@@ -7,7 +7,6 @@ from datetime import datetime, timezone
 # Загрузка кастомных файлов
 from config import base_prompt
 from utils import log_error, load_memory, save_memory
-user_histories = load_memory()
 
 from dotenv import load_dotenv
 load_dotenv()

@@ -37,7 +37,7 @@ def load_memory():
         try:
             with open(MEMORY_FILE, "r", encoding="utf-8") as f:
                 user_histories.update(json.load(f))
-                print(f"Загружено {len(user_histories)} историй из памяти.")
+                print(f"Загружено {len(user_histories)} пользователей из памяти.")
         except Exception as e:
             print(f"Не удалось загрузить память: {e}")
             log_error(f"Не удалось загрузить память: {e}")
