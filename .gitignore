@@ -1,3 +1,6 @@
 __pycache__
 .env
 test.py
+
+dialog_memory.json
+error.json
