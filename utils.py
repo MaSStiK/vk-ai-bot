@@ -37,7 +37,7 @@ def load_memory():
         try:
             with open(MEMORY_FILE, "r", encoding="utf-8") as f:
                 user_histories.update(json.load(f))
-                print(f"Загружено {len(user_histories)} пользователей из памяти.")
+                print(f"Загружено {len(user_histories)} пользователей из памяти")
                 for user_id in user_histories:
                     print(f"{user_id}: {len(user_histories[user_id])}")
 

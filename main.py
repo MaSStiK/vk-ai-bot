@@ -19,7 +19,7 @@ from openai import OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openrouter.ai/api/v1")
 
 hash_users = {}
-MAX_HISTORY_LENGTH = 30  # Ограничение на количество сообщений в истории
+MAX_HISTORY_LENGTH = 20  # Ограничение на количество сообщений в истории
 BOT_ID = 817934388
 
 def start_typing_loop(vk, peer_id, stop_event):
@@ -91,7 +91,7 @@ def main():
 
                         # Обрезаем старую историю при необходимости
                         if len(user_histories[str(user_id)]) > MAX_HISTORY_LENGTH:
-                            user_histories[str(user_id)] = [user_histories[str(user_id)][0]] + user_histories[str(user_id)][-MAX_HISTORY_LENGTH:]
+                            user_histories[str(user_id)] = user_histories[str(user_id)][-MAX_HISTORY_LENGTH:]
 
                         stop_typing = threading.Event()
                         typing_thread = threading.Thread(target=start_typing_loop, args=(vk, peer_id, stop_typing))
@@ -109,6 +109,9 @@ def main():
                             save_memory(user_histories)
 
                             print(f"Ответ нейросети: {answer}")
+                            if len(answer) >= 4000:
+                                print(f"Ответ больше 4000 символов")
+                                answer = answer[:4000]
                             vk_messages_send(peer_id=peer_id, message=answer, reply_to=message_id)
 
                         except Exception as e:
