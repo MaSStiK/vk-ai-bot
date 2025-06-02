@@ -3,6 +3,7 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import os, time, json
 from datetime import datetime, timezone
+import traceback
 import threading
 
 # Загрузка кастомных файлов
@@ -38,6 +39,7 @@ def main():
     print("Бот запущен")
 
     def vk_messages_send(peer_id, message, reply_to=None):
+        print("reply_to", reply_to)
         params = {
             "peer_id": peer_id,
             "random_id": 0,
@@ -45,6 +47,7 @@ def main():
         }
         if reply_to:
             params["reply_to"] = reply_to
+        print("params", params)
         vk.messages.send(**params)
 
     for event in longpoll.listen():
@@ -113,10 +116,13 @@ def main():
                                 print(f"Ответ больше 4000 символов")
                                 answer = answer[:4000]
                             vk_messages_send(peer_id=peer_id, message=answer, reply_to=message_id)
-
-                        except Exception as e:
-                            print(f"Ошибка обработки сообщения: {e}")
-                            log_error(f"Ошибка обработки сообщения: {e}")
+                        except:
+                            # Если ошибка [913] Too many forwarded messages
+                            try:
+                                vk_messages_send(peer_id=peer_id, message=answer)
+                            except Exception as e:
+                                print(f"Ошибка обработки сообщения: {traceback.format_exc()}")
+                                log_error(f"Ошибка обработки сообщения: {traceback.format_exc()}")
                         finally:
                             stop_typing.set()
                             typing_thread.join()
