@@ -3,6 +3,7 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import os, time, json
 from datetime import datetime, timezone
+import threading
 
 # Загрузка кастомных файлов
 from config import base_prompt
@@ -18,14 +19,23 @@ from openai import OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openrouter.ai/api/v1")
 
 hash_users = {}
-MAX_HISTORY_LENGTH = 20  # Ограничение на количество сообщений в истории
+MAX_HISTORY_LENGTH = 30  # Ограничение на количество сообщений в истории
+BOT_ID = 817934388
+
+def start_typing_loop(vk, peer_id, stop_event):
+    while not stop_event.is_set():
+        try:
+            vk.messages.setActivity(peer_id=peer_id, type="typing")
+        except Exception as e:
+            print(f"Ошибка при setActivity: {e}")
+        time.sleep(4)
 
 def main():
     session = vk_api.VkApi(token=VK_TOKEN)
     vk = session.get_api()
     longpoll = VkLongPoll(session)
     user_histories = load_memory()
-    print("Bot started")
+    print("Бот запущен")
 
     def vk_messages_send(peer_id, message, reply_to=None):
         params = {
@@ -69,11 +79,12 @@ def main():
                     )
                     replied_message = response["items"][0]
 
-                    if replied_message["from_id"] == 817934388:
+                    if replied_message["from_id"] == BOT_ID:
+                        print(f"Генерация ответа на сообщение: \"{user_name}: {message}\"")
 
                         # Инициализируем историю пользователя, если её нет
                         if str(user_id) not in user_histories:
-                            user_histories[str(user_id)] = [{"role": "user", "content": base_prompt}]
+                            user_histories[str(user_id)] = []
 
                         # Добавляем новое сообщение в историю
                         user_histories[str(user_id)].append({"role": "user", "content": f"{user_name}: {message}"})
@@ -82,10 +93,14 @@ def main():
                         if len(user_histories[str(user_id)]) > MAX_HISTORY_LENGTH:
                             user_histories[str(user_id)] = [user_histories[str(user_id)][0]] + user_histories[str(user_id)][-MAX_HISTORY_LENGTH:]
 
+                        stop_typing = threading.Event()
+                        typing_thread = threading.Thread(target=start_typing_loop, args=(vk, peer_id, stop_typing))
+                        typing_thread.start()
+
                         try:
                             ai_response = client.chat.completions.create(
                                 model="deepseek/deepseek-chat-v3-0324:free",
-                                messages=user_histories[str(user_id)]
+                                messages=[{"role": "user", "content": base_prompt}, *user_histories[str(user_id)]]
                             )
                             answer = ai_response.choices[0].message.content.strip()
 
@@ -98,9 +113,15 @@ def main():
 
                         except Exception as e:
                             print(f"Ошибка обработки сообщения: {e}")
+                            log_error(f"Ошибка обработки сообщения: {e}")
+                        finally:
+                            stop_typing.set()
+                            typing_thread.join()
 
                 except Exception as e:
                     print(f"Ошибка обработки reply: {e}")
+                    log_error(f"Ошибка обработки reply: {e}")
+
 
 if __name__ == "__main__":
     while True:
