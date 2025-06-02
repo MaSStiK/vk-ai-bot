@@ -3,4 +3,5 @@ __pycache__
 test.py
 
 dialog_memory.json
+dialog_memory copy.json
 error.json

@@ -39,7 +39,6 @@ def main():
     print("Бот запущен")
 
     def vk_messages_send(peer_id, message, reply_to=None):
-        print("reply_to", reply_to)
         params = {
             "peer_id": peer_id,
             "random_id": 0,
@@ -47,7 +46,6 @@ def main():
         }
         if reply_to:
             params["reply_to"] = reply_to
-        print("params", params)
         vk.messages.send(**params)
 
     for event in longpoll.listen():
@@ -121,8 +119,8 @@ def main():
                             try:
                                 vk_messages_send(peer_id=peer_id, message=answer)
                             except Exception as e:
-                                print(f"Ошибка обработки сообщения: {traceback.format_exc()}")
-                                log_error(f"Ошибка обработки сообщения: {traceback.format_exc()}")
+                                print(f"Ошибка обработки сообщения: {e}")
+                                log_error(f"Ошибка обработки сообщения: {e}")
                         finally:
                             stop_typing.set()
                             typing_thread.join()

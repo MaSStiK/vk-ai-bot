@@ -2,8 +2,8 @@ import json
 import os
 from datetime import datetime, timezone
 
-MEMORY_FILE = "dialog_memory.json"
 ERROR_FILE = "error.json"
+MEMORY_FILE = "dialog_memory.json"
 
 # Получение текущей даты
 def get_time_now():
