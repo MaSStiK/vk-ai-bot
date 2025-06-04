@@ -104,18 +104,19 @@ def main():
                                 messages=[{"role": "user", "content": base_prompt}, *user_histories[str(user_id)]]
                             )
                             answer = ai_response.choices[0].message.content.strip()
+                            answer = answer.replace("*", "") # Убираем лишний символ
+                            print(f"Ответ нейросети: {answer}")
 
                             # Добавляем ответ ИИ в историю
                             user_histories[str(user_id)].append({"role": "assistant", "content": answer})
                             save_memory(user_histories)
 
-                            print(f"Ответ нейросети: {answer}")
                             if len(answer) >= 4000:
                                 print(f"Ответ больше 4000 символов")
                                 answer = answer[:4000]
                             vk_messages_send(peer_id=peer_id, message=answer, reply_to=message_id)
                         except:
-                            # Если ошибка [913] Too many forwarded messages
+                            # Если ошибка [913] Too many forwarded messages - отвечаем без ответа на сообщение
                             try:
                                 vk_messages_send(peer_id=peer_id, message=answer)
                             except Exception as e:
