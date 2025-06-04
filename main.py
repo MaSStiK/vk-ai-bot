@@ -13,11 +13,11 @@ from utils import log_error, load_memory, save_memory
 from dotenv import load_dotenv
 load_dotenv()
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPEN_ROUTER_API_KEY = os.getenv("OPEN_ROUTER_API_KEY")
 VK_TOKEN = os.getenv("VK_TOKEN")
 
 from openai import OpenAI
-client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://openrouter.ai/api/v1")
+client = OpenAI(api_key=OPEN_ROUTER_API_KEY, base_url="https://openrouter.ai/api/v1")
 
 hash_users = {}
 MAX_HISTORY_LENGTH = 20  # Ограничение на количество сообщений в истории
