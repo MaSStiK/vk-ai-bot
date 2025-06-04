@@ -11,6 +11,7 @@ def get_time_now():
 
 # Логирование времени
 def log_error(e):
+    print(e)
     try:
         error_entry = {"time": get_time_now(), "error": str(e)}
         errors = []
@@ -28,7 +29,7 @@ def log_error(e):
             json.dump(errors, f, ensure_ascii=False, indent=4)
 
     except Exception as log_exc:
-        print(f"Ошибка логирования: {log_exc}")
+        print(f"Ошибка сохранения лога: {log_exc}")
 
 # Загрузка памяти бота
 def load_memory():
@@ -42,7 +43,6 @@ def load_memory():
                     print(f"{user_id}: {len(user_histories[user_id])}")
 
         except Exception as e:
-            print(f"Не удалось загрузить память: {e}")
             log_error(f"Не удалось загрузить память: {e}")
 
     return user_histories
@@ -53,5 +53,4 @@ def save_memory(user_histories):
         with open(MEMORY_FILE, "w", encoding="utf-8") as f:
             json.dump(user_histories, f, ensure_ascii=False, indent=4)
     except Exception as e:
-        print(f"Не удалось сохранить память: {e}")
         log_error(f"Не удалось сохранить память: {e}")

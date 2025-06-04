@@ -28,7 +28,7 @@ def start_typing_loop(vk, peer_id, stop_event):
         try:
             vk.messages.setActivity(peer_id=peer_id, type="typing")
         except Exception as e:
-            print(f"Ошибка при setActivity: {e}")
+            log_error(f"Ошибка при setActivity: {e}")
         time.sleep(4)
 
 def main():
@@ -120,14 +120,12 @@ def main():
                             try:
                                 vk_messages_send(peer_id=peer_id, message=answer)
                             except Exception as e:
-                                print(f"Ошибка обработки сообщения: {e}")
                                 log_error(f"Ошибка обработки сообщения: {e}")
                         finally:
                             stop_typing.set()
                             typing_thread.join()
 
                 except Exception as e:
-                    print(f"Ошибка обработки reply: {e}")
                     log_error(f"Ошибка обработки reply: {e}")
 
 
@@ -136,6 +134,5 @@ if __name__ == "__main__":
         try:
             main()
         except Exception as e:
-            print(f"Ошибка: {e}")
-            log_error(e)
+            log_error(f"Ошибка при старте main(): {e}")
         time.sleep(4)
