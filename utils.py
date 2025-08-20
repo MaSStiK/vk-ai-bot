@@ -7,7 +7,7 @@ MEMORY_FILE = "dialog_memory.json"
 
 # Получение текущей даты
 def get_time_now():
-    return str(datetime.now(timezone.utc)).split(".")[0].replace(":", ".")
+    return str(datetime.now(timezone.utc)).split(".")[0].replace("-", ".")
 
 # Логирование времени
 def log_error(e):
