@@ -20,8 +20,8 @@ def log_error(e):
             with open("error.json", "r", encoding="utf-8") as f:
                 try:
                     errors = json.load(f)
-                except json.JSONDecodeError:
-                    pass # Файл может быть пустым или поврежденным
+                except:
+                    pass # Если ошибка, то просто пропускаем
 
         errors.append(error_entry)
 
