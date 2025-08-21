@@ -118,8 +118,8 @@ def main():
                             model="deepseek/deepseek-chat-v3-0324:free",
                             messages=[{"role": "user", "content": base_prompt}, *user_histories[str(user_id)]]
                         )
-                        answer = ai_response.choices[0].message.content.strip()
-                        answer = answer.replace("*", "") # Убираем лишний символ
+                        # Убираем лишний символ
+                        answer = ai_response.choices[0].message.content.strip().replace("*", "")
                         print(f"Ответ нейросети: {answer}")
 
                         # Добавляем ответ ИИ в историю
@@ -137,7 +137,7 @@ def main():
                             except Exception as e:
                                 log_error(f"Ошибка отправки сообщения: {e}")
 
-                        elif e.code == 429: # Ошибка если закончились токен
+                        elif e.code == 429: # Ошибка если закончились токены
                             log_error(f"Ошибка, закончились токены: {e}")
                         else:
                             traceback.print_exc()
