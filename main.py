@@ -20,7 +20,7 @@ client = OpenAI(api_key=OPEN_ROUTER_API_KEY, base_url="https://openrouter.ai/api
 
 hash_users = {}
 MAX_HISTORY_LENGTH = 20  # Ограничение на количество сообщений в истории
-BOT_ID = os.getenv("BOT_ID") # Ваш ID Бота
+BOT_ID = int(os.getenv("BOT_ID")) # ID Бота
 
 def start_typing_loop(vk, peer_id, stop_event):
     while not stop_event.is_set():
