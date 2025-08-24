@@ -2,13 +2,12 @@
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import os, time, json
-from datetime import datetime, timezone
 import traceback
 import threading
 
 # Загрузка кастомных файлов
 from config import base_prompt
-from utils import log_error, load_memory, save_memory
+from utils import log_error, load_history, save_history
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -45,7 +44,7 @@ def main():
     session = vk_api.VkApi(token=VK_TOKEN)
     vk = session.get_api()
     longpoll = VkLongPoll(session)
-    user_histories = load_memory()
+    user_histories = load_history()
     print("Бот запущен")
 
     for event in longpoll.listen():
@@ -124,7 +123,7 @@ def main():
 
                         # Добавляем ответ ИИ в историю
                         user_histories[str(user_id)].append({"role": "assistant", "content": answer})
-                        save_memory(user_histories)
+                        save_history(user_histories)
 
                         if len(answer) >= 4000:
                             print(f"Ответ больше 4000 символов")
